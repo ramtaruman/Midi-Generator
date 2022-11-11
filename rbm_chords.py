@@ -28,7 +28,7 @@ def get_songs(path):
     return songs
 
 
-songs = get_songs('Pop_Music_Midi')
+songs = get_songs('in')
 print("{} songs processed".format(len(songs)))
 
 
