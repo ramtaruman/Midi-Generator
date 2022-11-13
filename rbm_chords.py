@@ -8,14 +8,19 @@ import msgpack
 import glob
 import tensorflow as tf
 from tensorflow.python.ops import control_flow_ops
+# tqdm supports async, most of what is written these days.
 from tqdm import tqdm
+# disables eager execution, this function is not necessary if you are using v2.
 tf.compat.v1.disable_eager_execution()
+# eager execution is enabled by default.
 
-
+# Tensorflow pollutes standard error with gpu's memory allocation logs. To disable such error logging the bottom line is used.
+# Use '3' as a parameter if you wanna disable everything, including info, warning and error. 2 Just disables infor and warning.
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 def get_songs(path):
+    # the glob module finds all pathnames matching a specified patter
     files = glob.glob('{}/*.mid*'.format(path))
     songs = []
     for f in tqdm(files):
@@ -31,24 +36,30 @@ def get_songs(path):
 songs = get_songs('in')
 print("{} songs processed".format(len(songs)))
 
+# parameters for the model
 
-lowest_note = midi_manipulation.lowerBound
-highest_note = midi_manipulation.upperBound
-note_range = highest_note - lowest_note
-num_timesteps = 15
-n_visible = 2 * note_range * num_timesteps
-n_hidden = 50
+lowest_note = midi_manipulation.lowerBound  # lowest note in the arrangement
+highest_note = midi_manipulation.upperBound  # highest note in the arrangement
+note_range = highest_note - lowest_note  # pitch range of the arrangement
 
-num_epochs = 200
+num_timesteps = 15  # timesteps created one at a time, change at your own risk
+n_visible = 2 * note_range * num_timesteps  # first rbm layer : visible
+n_hidden = 50  # second rbm layer : hidden
 
-batch_size = 100
-lr = tf.constant(0.005, tf.float32)
+num_epochs = 200  # cycles that are run, higher would probably tend to have more accurate results but more time
+
+batch_size = 100  # number of samples, adjust according to the dataset
+lr = tf.constant(0.005, tf.float32)  # recommended rate according to RBM paper
 
 
 x = tf.compat.v1.placeholder(tf.float32, [None, n_visible], name="x")
+# edge weights
+
 W = tf.Variable(tf.random.normal([n_visible, n_hidden], 0.01), name="W")
+# hidden layer
 bh = tf.Variable(tf.zeros([1, n_hidden], tf.float32, name="bh"))
 bv = tf.Variable(tf.zeros([1, n_visible], tf.float32, name="bv"))
+# I used a matrix, you can use whatever else
 
 
 def sample(probs):
