@@ -1,52 +1,33 @@
-# midi-generator
-
-Midifile generation with Tensorflow using [Restricted Boltzmann Machine](http://deeplearning4j.org/restrictedboltzmannmachine.html).
-
-This code implements a RNN to generate music, mostly by predicting which notes will be played at each time step of a musical piece.
-
-To use the model, you need to obtain a hefty selection of midi music, preferably in 4/4 time signature.
+Note: this is described in detail here: http://danshiebler.com/2016-08-17-musical-tensorflow-part-two-the-rnn-rbm/
 
 
-## Prerquisites using PyPI
-```bash
-pip install tensorflow
-pip install pandas
-pip install msgpack
-pip install numpy
-pip install glob2
-pip install tqdm
-pip install py-midi
+# Music_RNN_RBM
+
+This repository contains code for generating long sequences of polyphonic music by using an RNN_RBM in TensorFlow. 
+
+### TLDR:
+You can generate music by cloning the directory and running:
 ```
-
-##  Midi datasets for training
-There are lots of crowdsourced datasets already floating in the interwebz so I went ahead and tested some of them.
-
-- [Classical Piano](http://www.piano-midi.de/)
-
-- [ABC Music Project](https://abc.sourceforge.net/NMD/)
-
-- [Lakh Dataset](https://colinraffel.com/projects/lmd/)
-
-
-## Misc Reasearch Sources
-There will always be some better source of literature for the given topic
-
-- [Gibbs Chain](https://en.wikipedia.org/wiki/Gibbs_sampling)
-- [Gradient Descent](https://en.wikipedia.org/wiki/Gibbs_sampling)
-- [GRU](https://en.wikipedia.org/wiki/Gated_recurrent_unit)
-
-## FAQ stuff
-There are some common hurdles to working with the code, I will keep listing them here.
-
-Q. Why are the weightings not seperately intialized ?
-
+python rnn_rbm_generate.py parameter_checkpoints/pretrained.ckpt
 ```
-Conventionally, to train the model, parameters of the RBM needs to be intialized first before beginning the training of the model but this just requires more command execution in the shell. The only downside for this is the static <num_epochs> present in the code which can be initiallzed if dealing with seperate execution chain..
-```
-Q. How to fix "AttributeError: 'module' object has no attribute 'read_midifile'" ?
-```py3
-pip install git+https://github.com/vishnubob/python-midi@feature/python3
-```
-## Further Literature
+This will populate the music_outputs directory with midi files that you can play with an application like GuitarBand.
 
-- [Boulanger-Lewandoski 2012](https://arxiv.org/abs/1206.6392)
+### Training
+To train the model, first run the following command to initialize the parameters of the RBM.
+```
+python weight_initializations.py
+```
+Then, run the following command to train the RNN_RBM model:
+```
+python rnn_rbm_train.py <num_epochs>
+```
+`num_epochs` can be any integer. Set it between 50-500, depending on the hyperparameters.
+
+### Generation:
+The command:
+```
+python rnn_rbm_generate.py <path_to_ckpt_file>
+```
+will generate music by using the weights stored in the `path_to_ckpt_file`. You can use the provided file `parameter_checkpoints/pretrained.ckpt`, or you can use one of the ckpt files that you create. When you run `train_rnn_rbm.py`, the model creates a `epoch_<x>.ckpt` file in the parameter_checkpoints directory every couple of epochs. 
+
+
